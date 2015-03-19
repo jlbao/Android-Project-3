@@ -12,6 +12,13 @@
         android:name="com.google.android.gms.maps.MapFragment"
         android:layout_gravity="center_horizontal|top" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/count"
+        android:id="@+id/count" />
+
     <LinearLayout
         android:id="@+id/linearLayout"
         android:orientation="vertical"

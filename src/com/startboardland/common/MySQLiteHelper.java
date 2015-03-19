@@ -16,11 +16,14 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "test";
     private static final int DATABASE_VERSION = 1;
 
+//    // Database creation sql statement
+//    private static final String DATABASE_CREATE = "create table "
+//            + TABLE_MY_SEGMENT + "(" + SEGMENT_ID
+//            + " integer primary key, " + STEP_COUNT
+//            + " integer not null);";
+
     // Database creation sql statement
-    private static final String DATABASE_CREATE = "create table "
-            + TABLE_MY_SEGMENT + "(" + SEGMENT_ID
-            + " integer primary key, " + STEP_COUNT
-            + " integer not null);";
+    private static final String DATABASE_CREATE = "create table MySegment (_id integer, dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP, step integer not null, PRIMARY KEY (_id, dt));";
 
     public MySQLiteHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
