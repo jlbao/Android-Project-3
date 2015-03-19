@@ -90,7 +90,7 @@ public class CounterActivity extends FragmentActivity implements SensorEventList
 
         //set timer
         timer = new Timer();
-        timer.schedule(new Task(this), new Date(), 8000);
+        timer.schedule(new Task(this), new Date(new Date().getTime() + 1000 * 8), 8000);
     }
 
     // write database
