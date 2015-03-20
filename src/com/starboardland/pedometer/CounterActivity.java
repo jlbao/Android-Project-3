@@ -8,6 +8,7 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -16,7 +17,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.startboardland.common.Segment;
 import com.startboardland.common.SegmentDAO;
 import com.startboardland.common.Task;
 
@@ -43,17 +43,27 @@ public class CounterActivity extends FragmentActivity implements SensorEventList
     public float prevStepCount = -1;
 
     public SensorManager sensorManager;
-    private TextView countView;
     boolean activityRunning;
     public Timer timer;
+
+    public TextView textView;
+
+    public int segment_idx = 1;
+
+    public Object lockObj = new Object();
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_map);
-        countView = (TextView) findViewById(R.id.count);
         linearLayout = (LinearLayout) findViewById(R.id.linearLayout);
+        textView = (TextView) findViewById(R.id.textView);
+        textView.setText("Segment 1 steps: 0");
+
+        //set timer
+        timer = new Timer();
+        timer.schedule(new Task(this), new Date(new Date().getTime() + 1000 * 60 * 2), 1000 * 60 * 2);
 
         // open database connection
         dao = new SegmentDAO(getApplicationContext());
@@ -87,17 +97,8 @@ public class CounterActivity extends FragmentActivity implements SensorEventList
         } else {
             Toast.makeText(this, "Count sensor not available!", Toast.LENGTH_LONG).show();
         }
-
-        //set timer
-        timer = new Timer();
-        timer.schedule(new Task(this), new Date(new Date().getTime() + 1000 * 8), 8000);
     }
 
-    // write database
-    protected void writeDatabase() {
-        Segment seg = new Segment(1, 201);
-        dao.createSegment(seg);
-    }
 
     @Override
     protected void onResume() {
@@ -124,11 +125,13 @@ public class CounterActivity extends FragmentActivity implements SensorEventList
     public void onSensorChanged(SensorEvent event) {
         if (activityRunning) {
             if (prevStepCount == -1) {
-                prevStepCount = event.values[0] - 1;
-                totalStepCount = 1;
+                prevStepCount = event.values[0];
+                totalStepCount = 0;
             }
             currentStepCount = event.values[0] - totalStepCount - prevStepCount;
-            countView.setText(String.valueOf(currentStepCount));
+            String text = "Segment " + segment_idx + " steps: " + (int) currentStepCount;
+            Log.d("haha", text);
+            textView.setText(text);
         }
     }
 

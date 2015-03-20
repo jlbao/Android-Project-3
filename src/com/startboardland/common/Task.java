@@ -14,7 +14,6 @@ import java.util.TimerTask;
  */
 public class Task extends TimerTask {
 
-    int segment_idx = 0;
     CounterActivity activity;
 
     public Task(CounterActivity activity) {
@@ -23,36 +22,50 @@ public class Task extends TimerTask {
 
     @Override
     public void run() {
-        if (segment_idx++ == 8) {
+        // store to database
+        Segment seg = new Segment(activity.segment_idx, (int) activity.currentStepCount);
+        activity.dao.createSegment(seg);
+        if (activity.segment_idx == 8) {
+            activity.resetCount();
+            activity.sensorManager.unregisterListener(activity);
             activity.timer.cancel();
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    //display toast
+                    Toast.makeText(activity.getApplicationContext(), String.valueOf((int) activity.currentStepCount), Toast.LENGTH_SHORT).show();
+
+                    // create final text view showing total step count
+                    TextView finalTextView = new TextView(activity.getApplicationContext());
+                    finalTextView.setText(String.format("Total Steps: %s", (int) activity.totalStepCount));
+                    activity.linearLayout.addView(finalTextView);
+                    LinearLayout.LayoutParams p = (LinearLayout.LayoutParams) activity.textView.getLayoutParams();
+                    p.gravity = Gravity.CENTER_HORIZONTAL;
+                    finalTextView.setLayoutParams(p);
+                }
+            });
             return;
         }
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                TextView textView = new TextView(activity.getApplicationContext());
-                if (segment_idx <= 8) {
-                    textView.setText(String.format("Segment %s steps: %s", segment_idx, activity.currentStepCount));
-                    Toast.makeText(activity.getApplicationContext(), ((Float) activity.currentStepCount).toString(), Toast.LENGTH_SHORT).show();
-                }
-                Segment seg = new Segment(segment_idx, (int) activity.currentStepCount);
-                activity.dao.createSegment(seg);
+                //display toast
+                Toast.makeText(activity.getApplicationContext(), String.valueOf((int) activity.currentStepCount), Toast.LENGTH_SHORT).show();
+
+                // calculate the steps
+                activity.segment_idx++;
                 activity.totalStepCount += activity.currentStepCount;
                 activity.currentStepCount = 0;
-                activity.linearLayout.addView(textView);
-                LinearLayout.LayoutParams p = (LinearLayout.LayoutParams) textView.getLayoutParams();
+
+                // create new Text view
+                String text = "Segment " + activity.segment_idx + " steps: " + 0;
+                activity.textView = new TextView(activity.getApplicationContext());
+                activity.textView.setText(text);
+
+                activity.linearLayout.addView(activity.textView);
+                LinearLayout.LayoutParams p = (LinearLayout.LayoutParams) activity.textView.getLayoutParams();
                 p.gravity = Gravity.CENTER_HORIZONTAL;
-                textView.setLayoutParams(p);
-                if (segment_idx == 8) {
-                    TextView finalTextView = new TextView(activity.getApplicationContext());
-                    finalTextView.setText(String.format("Total Steps: %s", activity.totalStepCount));
-                    activity.linearLayout.addView(finalTextView);
-                    p = (LinearLayout.LayoutParams) textView.getLayoutParams();
-                    p.gravity = Gravity.CENTER_HORIZONTAL;
-                    finalTextView.setLayoutParams(p);
-                    activity.resetCount();
-                    activity.sensorManager.unregisterListener(activity);
-                }
+                activity.textView.setLayoutParams(p);
             }
         });
 
