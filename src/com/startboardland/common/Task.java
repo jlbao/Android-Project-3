@@ -26,14 +26,18 @@ public class Task extends TimerTask {
         Segment seg = new Segment(activity.segment_idx, (int) activity.currentStepCount);
         activity.dao.createSegment(seg);
         if (activity.segment_idx == 8) {
-            activity.resetCount();
             activity.sensorManager.unregisterListener(activity);
             activity.timer.cancel();
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     //display toast
-                    Toast.makeText(activity.getApplicationContext(), String.valueOf((int) activity.currentStepCount), Toast.LENGTH_SHORT).show();
+                    String toastText = String.format("You took %s steps in segment %s", (int) activity.currentStepCount, activity.segment_idx);
+                    Toast.makeText(activity.getApplicationContext(), toastText, Toast.LENGTH_SHORT).show();
+
+                    // calculate the steps
+                    activity.totalStepCount += activity.currentStepCount;
+                    activity.currentStepCount = 0;
 
                     // create final text view showing total step count
                     TextView finalTextView = new TextView(activity.getApplicationContext());
@@ -50,7 +54,8 @@ public class Task extends TimerTask {
             @Override
             public void run() {
                 //display toast
-                Toast.makeText(activity.getApplicationContext(), String.valueOf((int) activity.currentStepCount), Toast.LENGTH_SHORT).show();
+                String toastText = String.format("You took %s steps in segment %s", (int) activity.currentStepCount, activity.segment_idx);
+                Toast.makeText(activity.getApplicationContext(), toastText, Toast.LENGTH_SHORT).show();
 
                 // calculate the steps
                 activity.segment_idx++;
